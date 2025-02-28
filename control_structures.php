@@ -38,3 +38,4 @@ if ($tempreture > 30){
 
 // If-elseif-else statement for multiple conditions.
 // Allows checking multiple conditions in sequence
+?>
