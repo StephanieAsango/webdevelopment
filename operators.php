@@ -225,5 +225,27 @@ $status = ($age >= 18 ?"adult" :"minor");
 
 echo $status ." <br>";
 
+// Operator precedence
+// Like in mathematics, PHP operators have a specific order of precedence
+// Example showing precedencd
+$result= 5 +3 *2 ; //Result is 11 not 16
+echo $result . "<br>";
+
+// Using parenthesis to overide precedence 
+$result=( 5 +3 )*2 ; //Result is 16
+// Parenthesis have the highest precedence
+echo $result . "<br>";
+
+// precedence can cause unexpected behaviour
+$a = 3;
+$b = 5;
+if ($a = $b) {//Assigns $b to $athen evaluates to 5(truthy)
+    echo "This will always execute";
+}
+
+// The correct comparison would be : if ($a == $b) 
+// Operators are powerful tools in PHP that let you manipulate variables and perform calculations efficiently. Understanding hoe they work and their precedence is essential for writing correct and effective  PHP code
+
+// Next  Control Structures in PHP ->control_structures.php
 
 ?>
