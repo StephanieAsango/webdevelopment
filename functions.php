@@ -143,3 +143,6 @@ function calculateAverage(array $numbers){
 $scores = [85, 92,78, 95, 88];
 $average =calculateAverage($scores); //Outputs 87.6
 echo "The average is $average";
+
+// Next - arrays
+?>
