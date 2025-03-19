@@ -98,7 +98,216 @@ function createProduct($pdo, $name, $price, $description){
 }
 
 // Usage create several products
-$ProductID = createProduct($pdo, "smartphone", 599.99, "latest model with advanced features");
-if ($ProductID){
-    echo "Product created with ID:" . $ProductID;
+// $ProductID = createProduct($pdo, "smartphone", 599.99, "latest model with advanced features");
+// if ($ProductID){
+//     echo "Product created with ID:" . $ProductID;
+// }
+
+
+// Tommorow 
+// Inserting multiple records at once
+
+function createMultiplerecords($pdo, $records){
+    try{
+        // begin transaction for multiple inserts
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO items(name, category, price)
+            VALUES(:name, :category,:price)
+        ");
+
+        // Insert into each record
+        foreach($records as $record){
+            $stmt->execute([
+                ':name'=>$record['name'],
+                ':category'=>$record['category'],
+                ':price'=>$record['price']
+            ]);
+        } 
+        // Commit the transaction
+        $pdo->commit();
+        return true;
+
+    }catch(PDOException $e){
+        // Rollback if something went wrong
+        $pdo->rollback();
+        echo "Error creating products";
+        return false;
+    }
+}
+
+$items =[
+    [
+        'name'=> 'Laptop',
+        'category'=>'Electronics',
+        'price'=> 999.99
+    ],
+    [
+        'name'=> 'Headphones',
+        'category'=>'Accessories',
+        'price'=> 149.99
+    ],
+    [
+        'name'=> 'Mouse',
+        'category'=>'Peripherals',
+        'price'=> 29.99
+    ]
+    ];
+// if (createMultiplerecords($pdo, $items)){
+//     Echo "all items created succesfully";
+// }
+
+// Read (Select)
+//1. REtrieving a single record by ID
+function getUserByID($pdo, $userId){
+    try{
+        $stmt= $pdo->prepare("SELECT id, username, email, password, created_at FROM users WHERE id = :id");
+        $stmt= $pdo->prepare("SELECT *  FROM users WHERE id = :id");
+        $stmt->execute([ ':id' =>$userId]);
+
+        // Fetch a single
+        return $stmt->fetch();
+
+    }catch(PDOException $e) {
+        echo "Error retrieving user: ". $e->getMessage();
+        return false;
+    }
+}
+
+// Eample usage
+// $user =getUserByID($pdo, 3);
+// if ($user){
+//     echo "Username: " .$user['username'] .",Email: " . $user['email'];
+// } else{  echo "User not found";
+// }
+
+// 2. Retrieving multiplerecords{
+function getAllUsers($pdo, $limit =10, $offset = 0){
+    try{
+        $stmt = $pdo->prepare("
+            SELECT * FROM users
+            ORDER BY created_at DESC
+            LIMIT :limit OFFSET :offset
+        ");
+
+        // Bind parameters(must be bound as integers for LIMIT/OFFSET)
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // Fetch all rowa
+        return $stmt->fetchAll();
+
+    }catch(PDOException $e){
+        echo "Error retrieving users: ". $e->getMessage();
+        return [];
+    }
+}
+
+// Example usage
+// Get users from the beggining(first page)
+$users = getAllUsers($pdo);
+
+// Get 20 users from the beggining
+$users = getAllUsers($pdo , 20);
+// Get 10 users starting from the 11th user (second page of 10)
+// $users = getAllUsers($pdo ,10, 10);
+
+// display users
+// foreach($users as $user){
+//     echo "Username:{$user['username']} ,    Email: {$user['email']} <br>";
+// } 
+
+
+// 3. Retrieving with conditions
+function searchUsers($pdo, $searchTerm){
+    try{
+        $searchTerm ="%$searchTerm%";  //Add wildcards for like query
+        $stmt = $pdo->prepare("
+            SELECT * FROM users
+            WHERE username LIKE :term1
+            OR email LIKE :term2
+            ORDER BY username
+        ");
+
+        $stmt->bindParam(':term1', $searchTerm, PDO::PARAM_STR);
+        $stmt->bindParam(':term2', $searchTerm, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }catch(PDOException $e){
+        echo "Error searching users: ". $e->getMessage();
+        return [];
+    }
+}
+
+// Example usage
+// search for results with "john" in username or email 
+$searchResults = searchUsers($pdo, "a");
+
+// Display search results
+// if (count($searchResults) > 0) {
+//     echo "Found :" . count($searchResults) . "users:<br>" ;
+//     foreach ($searchResults as $user){
+//         echo "Username:{$user['username']} ,    Email: {$user['email']} <br>";
+
+//     }
+// }else {
+//     echo "No users matching your search<br>";
+// }
+
+// 4. Counting recrds
+function countUsers($pdo){
+    try{
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+        return $stmt->fetchColumn();
+    }catch(PDOException $e){
+        echo "Error counting users: ". $e->getMessage();
+        return 0;
+    }
+}
+
+// Example usage
+$totalUsers = countUsers($pdo);
+echo "Total number of users:" . $totalUsers  . "<br>";
+
+// Update (UPDATE) ->UPDATE table_name SET column_name = new_value
+// 1. Updating a single record
+function updateUser($pdo, $userId, $data){
+    try{
+        // Build the set part of the query dynamically
+        $fields = [];
+        $values = [];
+
+        foreach ($data as $field => $value){
+            $fields[] = "$field = :$field";
+            $values[":$field"] = $value;
+        }
+
+        // Add the user ID to values array
+        $values[':id'] = $userId;
+
+        $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE id= :id";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($values);
+
+        // return number of affected rows
+        return $stmt->rowCount();
+    }catch(PDOException $e){
+        echo "Error updating user: " . $e->getMessage();
+        return false;
+    }
+}
+
+// Usage
+$updated = updateUser($pdo, 1,  [
+    'username'=>'new_username',
+    'email'=> 'new_email@example.com'
+]);
+
+if ($updated){
+    echo "User updated succesfully. Row affected: $updated";
+}else{
+    echo  "No changes made or user not found";
 }
