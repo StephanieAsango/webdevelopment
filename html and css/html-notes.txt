@@ -1,0 +1,49 @@
+HTML
+
+HTML (Hypertext Markup Language) is the standard language of creating web pages.
+This tutorial will cover the essential concepts to get you started with HTML.
+
+Getting started
+
+HTML Structure
+DOCTYPE Declaration
+<IDOCTYPE html>
+This declaration tells browsers that this is HTML5 document
+
+HTML Element
+<html lang="en"> ... </html>
+The root elemnt of an HTML page. The LANG attribute specifies a language.
+
+Head Element
+<head> ... </head>
+Contains meta-information about the document that isn't displayed
+
+Meta Tags
+<meta charset="UTF-8">
+Specifies the character enclosing
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+Makes the page responsive for mobile devices
+
+Title Element
+<title>Page Title</title>
+Sets the title of the page(appears in browsers tab)
+
+Body Element
+<body> ... </body>
+Contains all the visible content of the web page
+
+Text Element
+Heading
+<h1>Main Heading</h1>
+The largest Heading
+
+<h2>Subheading</h2>
+Second-level Heading
+
+<h3></h3>, <h4></h4>, <h5></h5> and <h6></h6> are respectively smaller headings
+<h6>Smallest Heading</h6>
+
+
+Paragraphs
+<p>This is a Paragraph of text. HTML will automatically wrap the text</p>

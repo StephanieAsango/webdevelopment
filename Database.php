@@ -74,7 +74,7 @@ $pdo = $db->getConnection();
 // $newUserId = createUser($pdo, "miles", "miles@example.com", "secure_password123");
 
 // if ($newUserId){
-//     echo "User created with ID:" . $newUserId;
+    // echo "User created with ID:" . $newUserId;
 // }
 
 function createProduct($pdo, $name, $price, $description){
@@ -98,9 +98,9 @@ function createProduct($pdo, $name, $price, $description){
 }
 
 // Usage create several products
-// $ProductID = createProduct($pdo, "smartphone", 599.99, "latest model with advanced features");
+$ProductID = createProduct($pdo, "smartphone", 599.99, "latest model with advanced features");
 // if ($ProductID){
-//     echo "Product created with ID:" . $ProductID;
+    // echo "Product created with ID:" . $ProductID;
 // }
 
 
@@ -154,9 +154,9 @@ $items =[
         'price'=> 29.99
     ]
     ];
-// if (createMultiplerecords($pdo, $items)){
+//  if (createMultiplerecords($pdo, $items)){
 //     Echo "all items created succesfully";
-// }
+//  }
 
 // Read (Select)
 //1. REtrieving a single record by ID
@@ -269,7 +269,7 @@ function countUsers($pdo){
 
 // Example usage
 $totalUsers = countUsers($pdo);
-echo "Total number of users:" . $totalUsers  . "<br>";
+// echo "Total number of users:" . $totalUsers  . "<br>";
 
 // Update (UPDATE) ->UPDATE table_name SET column_name = new_value
 // 1. Updating a single record
@@ -300,14 +300,99 @@ function updateUser($pdo, $userId, $data){
     }
 }
 
-// Usage
-$updated = updateUser($pdo, 1,  [
-    'username'=>'new_username',
-    'email'=> 'new_email@example.com'
-]);
+// // Usage
+// $updated = updateUser($pdo, 1,  [
+//     'username'=>'new_username',
+//     'email'=> 'new_email@example.com'
+// ]);
 
-if ($updated){
-    echo "User updated succesfully. Row affected: $updated";
-}else{
-    echo  "No changes made or user not found";
+// if ($updated){
+//     echo "User updated succesfully. Row affected: $updated";
+// }else{
+//     echo  "No changes made or user not found";
+// }
+
+//3.Updating multiple records
+function updateProductPrices($pdo,$productId,$increasePercentage) {
+    try{
+        $stmt = $pdo->prepare("
+        UPDATE products
+        SET price= price * (1 + :percentage /100)
+        WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':percentage' => $increasePercentage,
+            ':id' => $productId
+
+        ]);
+
+        return $stmt->rowCount();
+
+
+    }catch (PDOException $e) {
+        echo "Error updating prices: " . $e->getMessage();
+        return false;
+    }
 }
+
+//Usage
+// $rowsUpdated = updateProductPrices($pdo ,1,5);
+// if ($rowsUpdated) {
+// echo "Prices updated successfully.$rowsUpdated products affected.";
+// }else {
+//     echo "No products were updated or an error occured.";
+// }
+
+//Delete(DELETE) -> DELETE FROM table_name WHERE column = value;
+//1. Deleting a single record
+
+function deleteUser($pdo,$userId) {
+    try {
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id =:id");
+        $stmt->execute([':id' => $userId]);
+
+        //Return number of rows affected
+        return $stmt->rowCount();
+
+    }catch (PDOException $e) {
+        echo "Error deleting user: ". $e->getMessage();
+        return false;
+    }
+}
+
+// //Usage
+// $deleted =deleteUser($pdo,6);
+// if($deleted) {
+//     echo "User deleted successfully";
+
+// }else {
+//     echo "User not found or could not be deleted";
+// }
+
+//2.Soft deletes (marking as deleted instead of actual deletion)
+function softDeleteUser($pdo,$userId) {
+    try{
+        $stmt =$pdo->prepare("
+UPDATE USERS
+SET deleted_at = NOW(),active =0
+WHERE id =:id;
+        
+        ");
+        $stmt->execute([':id' => $userId]);
+
+        //Return number of rows affected
+        return $stmt->rowCount();
+
+    }catch (PDOException $e) {
+        echo "Error soft-deleting user: ". $e->getMessage();
+        return false;
+    }
+    }
+    $deletedUser = softDeleteUser($pdo,2);
+    if($deletedUser){
+        echo "User deleted successfully";
+
+    }else{
+        echo "User not found or could not be deleted";
+    }
