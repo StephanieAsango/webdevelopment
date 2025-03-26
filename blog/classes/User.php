@@ -76,6 +76,4 @@ class User{
 
         $row = $this->db->single();
     }
-
-
 }
